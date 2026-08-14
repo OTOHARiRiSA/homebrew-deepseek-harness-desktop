@@ -1,0 +1,75 @@
+# 每天定时检查上游最新 Release，发现新版本自动更新 Cask 并提交。
+# sha256 直接取自 GitHub API 的官方资产 digest（sha256:...），
+# 无需下载安装包；digest 缺失时才回退为下载计算。
+name: auto-bump
+
+on:
+  schedule:
+    # 每天 UTC 05:23（可自行调整）
+    - cron: "23 5 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  bump:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check upstream latest release
+        run: |
+          python3 - <<'PY'
+          import json, re, subprocess, sys
+
+          upstream = "anywhere-labs/deepseek-harness-desktop"
+          cask_path = "Casks/deepseek-harness-desktop.rb"
+
+          rel = json.loads(subprocess.check_output([
+              "curl", "-fsSL",
+              f"https://api.github.com/repos/{upstream}/releases/latest",
+          ]))
+          tag = rel["tag_name"]
+          ver = tag.removeprefix("v")
+          dmg = next(a for a in rel["assets"]
+                     if a["name"].endswith((".dmg", ".zip", ".app.tar.gz")))
+          digest = dmg.get("digest") or ""
+          sha = digest.split(":", 1)[-1]
+          if len(sha) != 64:
+              # 兜底：API 没有 digest 时下载计算（GitHub CI 网络快）
+              sha = subprocess.check_output(
+                  f"curl -fsSL '{dmg['browser_download_url']}' | "
+                  "shasum -a 256 | cut -d' ' -f1",
+                  shell=True).decode().strip()
+
+          text = open(cask_path).read()
+          if f'version "{ver}"' in text and f'sha256 "{sha}"' in text:
+              print(f"up to date: {ver}")
+              sys.exit(0)
+
+          text = re.sub(r'version "[^"]+"', f'version "{ver}"', text, count=1)
+          text = re.sub(r'sha256 "[^"]+"', f'sha256 "{sha}"', text, count=1)
+          open(cask_path, "w").write(text)
+          print(f"bumped to {ver} (sha256 {sha[:16]}...)")
+          PY
+
+      - name: Verify cask
+        run: |
+          brew style ./Casks/*.rb
+          brew tap YOUR_GITHUB_USER/tap "$PWD"
+          brew audit --cask YOUR_GITHUB_USER/tap/deepseek-harness-desktop
+
+      - name: Commit & push
+        run: |
+          if git diff --quiet; then
+            echo "no changes"
+            exit 0
+          fi
+          VER=$(grep -o 'version "[^"]*"' Casks/deepseek-harness-desktop.rb | head -1 | cut -d'"' -f2)
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Casks/deepseek-harness-desktop.rb
+          git commit -m "deepseek-harness-desktop: bump to ${VER}"
+          git push

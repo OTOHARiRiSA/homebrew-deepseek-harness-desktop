@@ -1,4 +1,4 @@
-# 可选：每次推送 / 提 PR 时自动校验 Cask 的语法、风格与下载完整性。
+# 每次推送 / 提 PR 时自动校验 Cask 的语法、风格与下载完整性。
 name: ci
 
 on:
@@ -19,6 +19,10 @@ jobs:
       - name: Style check (brew style)
         run: brew style ./Casks/*.rb
 
-      # --online 会真实下载安装包并核对 sha256，能尽早发现 Release 资产问题
-      - name: Audit (brew audit --cask --online)
-        run: brew audit --cask --online ./Casks/*.rb
+      # Homebrew 6 的 audit 只接受 tap 内的 cask 名称，不接受文件路径：
+      # 先把本仓库注册为本地 tap，再按名称审计。
+      # --online 会真实下载安装包并核对 sha256，能尽早发现 Release 资产问题。
+      - name: Tap repo & audit (brew audit --cask --online)
+        run: |
+          brew tap YOUR_GITHUB_USER/tap "$PWD"
+          brew audit --cask --online YOUR_GITHUB_USER/tap/deepseek-harness-desktop
