@@ -21,8 +21,12 @@ jobs:
 
       # Homebrew 6 的 audit 只接受 tap 内的 cask 名称，不接受文件路径：
       # 先把本仓库注册为本地 tap，再按名称审计。
+      # 注意：前面的 brew style 可能已按 checkout 的 git remote（GitHub URL）
+      # 自动注册过同名 tap，直接以本地路径 tap 会报 remote mismatch，
+      # 所以先 untap（忽略失败）再 tap 本地路径。
       # --online 会真实下载安装包并核对 sha256，能尽早发现 Release 资产问题。
       - name: Tap repo & audit (brew audit --cask --online)
         run: |
+          brew untap otoharirisa/deepseek-harness-desktop 2>/dev/null || true
           brew tap OTOHARiRiSA/deepseek-harness-desktop "$PWD"
           brew audit --cask --online OTOHARiRiSA/deepseek-harness-desktop/deepseek-harness-desktop
