@@ -14,22 +14,26 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Homebrew
+        id: setup-homebrew
         uses: Homebrew/actions/setup-homebrew@master
 
       - name: Style check (brew style)
         run: brew style ./Casks/*.rb
 
-      # Homebrew 6 的 audit 只接受 tap 内的 cask 名称，不接受文件路径：
-      # 先把本仓库注册为本地 tap，再按名称审计。
-      # 注意：前面的 brew style 可能已按 checkout 的 git remote（GitHub URL）
-      # 自动注册过同名 tap，直接以本地路径 tap 会报 remote mismatch，
-      # 所以先 untap（忽略失败）再 tap 本地路径。
+      # setup-homebrew 检测到本仓库是 tap（homebrew-* 且根目录含 Casks/），
+      # 已自动用符号链接把仓库注册为 tap —— 直接按名称审计即可。
+      # 不要再 brew tap "$PWD"：会把符号链接替换成真实目录，
+      # 导致该 action 的 post 清理脚本 rm 失败（前两次 CI 失败的根源）。
       # --online 会真实下载安装包并核对 sha256，能尽早发现 Release 资产问题。
-      - name: Tap repo & audit (brew audit --cask --online)
+      - name: Audit (brew audit --cask --online)
         env:
-          # 用 runner 的 GITHUB_TOKEN 认证 GitHub API，避免共享 IP 被限流
+          # 认证 GitHub API，避免 runner 共享 IP 被限流
           HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          brew untap otoharirisa/deepseek-harness-desktop 2>/dev/null || true
-          brew tap OTOHARiRiSA/deepseek-harness-desktop "$PWD"
-          brew audit --cask --online OTOHARiRiSA/deepseek-harness-desktop/deepseek-harness-desktop
+          TAP="${{ steps.setup-homebrew.outputs.tap-name }}"
+          if [ -z "$TAP" ]; then
+            # 兜底：action 未自动注册时才手动 tap
+            TAP="OTOHARiRiSA/deepseek-harness-desktop"
+            brew tap "$TAP" "$PWD"
+          fi
+          brew audit --cask --online "$TAP/deepseek-harness-desktop"
