@@ -18,7 +18,7 @@
 
 ```bash
 # 1. 添加本 Tap（只需执行一次）
-brew tap YOUR_GITHUB_USER/tap
+brew tap OTOHARiRiSA/deepseek-harness-desktop
 
 # 2. 安装应用
 brew install --cask deepseek-harness-desktop
@@ -27,7 +27,7 @@ brew install --cask deepseek-harness-desktop
 > 也可以不单独执行 tap，一步完成（Homebrew 会自动添加 Tap）：
 >
 > ```bash
-> brew install --cask YOUR_GITHUB_USER/tap/deepseek-harness-desktop
+> brew install --cask OTOHARiRiSA/deepseek-harness-desktop/deepseek-harness-desktop
 > ```
 
 ### Gatekeeper 拦截时（应用未通过公证）
@@ -59,7 +59,7 @@ brew uninstall --cask --zap deepseek-harness-desktop  # 彻底卸载（清理配
 ## 仓库结构
 
 ```text
-homebrew-tap/
+homebrew-deepseek-harness-desktop/
 ├── Casks/
 │   └── deepseek-harness-desktop.rb     # Cask 定义（核心）
 ├── .github/
@@ -83,8 +83,8 @@ curl -s https://api.github.com/repos/anywhere-labs/deepseek-harness-desktop/rele
 
 # 3. 本地校验（本地 tap 方式，因 brew audit 不接受文件路径）
 brew style ./Casks/deepseek-harness-desktop.rb
-brew tap YOUR_GITHUB_USER/tap "$PWD"
-brew audit --cask YOUR_GITHUB_USER/tap/deepseek-harness-desktop
+brew tap OTOHARiRiSA/deepseek-harness-desktop "$PWD"
+brew audit --cask OTOHARiRiSA/deepseek-harness-desktop/deepseek-harness-desktop
 
 # 4. 提交推送
 git add Casks/deepseek-harness-desktop.rb

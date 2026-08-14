@@ -58,8 +58,8 @@ jobs:
       - name: Verify cask
         run: |
           brew style ./Casks/*.rb
-          brew tap YOUR_GITHUB_USER/tap "$PWD"
-          brew audit --cask YOUR_GITHUB_USER/tap/deepseek-harness-desktop
+          brew tap OTOHARiRiSA/deepseek-harness-desktop "$PWD"
+          brew audit --cask OTOHARiRiSA/deepseek-harness-desktop/deepseek-harness-desktop
 
       - name: Commit & push
         run: |

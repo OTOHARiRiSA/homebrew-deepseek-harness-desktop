@@ -24,5 +24,5 @@ jobs:
       # --online 会真实下载安装包并核对 sha256，能尽早发现 Release 资产问题。
       - name: Tap repo & audit (brew audit --cask --online)
         run: |
-          brew tap YOUR_GITHUB_USER/tap "$PWD"
-          brew audit --cask --online YOUR_GITHUB_USER/tap/deepseek-harness-desktop
+          brew tap OTOHARiRiSA/deepseek-harness-desktop "$PWD"
+          brew audit --cask --online OTOHARiRiSA/deepseek-harness-desktop/deepseek-harness-desktop
