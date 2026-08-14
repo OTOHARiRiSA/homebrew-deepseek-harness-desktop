@@ -2,8 +2,7 @@ cask "deepseek-harness-desktop" do
   version "0.1.0"
   sha256 "29b6043b1b9c63ff05954a79c21d630b8bc3066d153cefe07bc6abd4fde23839"
 
-  url "https://github.com/anywhere-labs/deepseek-harness-desktop/releases/download/v#{version}/DeepSeek-Harness-#{version}-arm64.dmg",
-      verified: "github.com/anywhere-labs/deepseek-harness-desktop/"
+  url "https://github.com/anywhere-labs/deepseek-harness-desktop/releases/download/v#{version}/DeepSeek-Harness-#{version}-arm64.dmg"
   name "DeepSeek Harness Desktop"
   desc "基于官方 DeepSeek Harness 打造的 Electron 图形化桌面客户端，开箱即用。"
   homepage "https://github.com/anywhere-labs/deepseek-harness-desktop"
