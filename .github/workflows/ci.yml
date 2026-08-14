@@ -26,6 +26,9 @@ jobs:
       # 所以先 untap（忽略失败）再 tap 本地路径。
       # --online 会真实下载安装包并核对 sha256，能尽早发现 Release 资产问题。
       - name: Tap repo & audit (brew audit --cask --online)
+        env:
+          # 用 runner 的 GITHUB_TOKEN 认证 GitHub API，避免共享 IP 被限流
+          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           brew untap otoharirisa/deepseek-harness-desktop 2>/dev/null || true
           brew tap OTOHARiRiSA/deepseek-harness-desktop "$PWD"

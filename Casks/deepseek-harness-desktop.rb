@@ -8,7 +8,7 @@ cask "deepseek-harness-desktop" do
   homepage "https://github.com/anywhere-labs/deepseek-harness-desktop"
 
   livecheck do
-    url :stable
+    url :homepage
     strategy :github_latest
   end
 
