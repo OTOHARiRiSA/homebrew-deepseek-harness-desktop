@@ -10,7 +10,7 @@
 ## 系统要求
 
 - **Apple Silicon（M1/M2/M3/M4 芯片）**：上游暂未发布 Intel 版本
-- macOS Ventura（13）及以上
+- macOS Monterey（12）及以上
 
 > 在 Intel 机器上执行安装会被 Homebrew 直接拒绝并提示架构不兼容。
 

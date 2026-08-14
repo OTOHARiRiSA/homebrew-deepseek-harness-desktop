@@ -12,7 +12,7 @@ cask "deepseek-harness-desktop" do
     strategy :github_latest
   end
 
-  depends_on macos: :ventura
+  depends_on macos: :monterey
   depends_on arch: :arm64
 
   app "DeepSeek Harness.app"
