@@ -24,8 +24,11 @@ jobs:
           python3 - <<'PY'
           import json, re, subprocess, sys
 
-          upstream = "anywhere-labs/deepseek-harness-desktop"
-          cask_path = "Casks/deepseek-harness-desktop.rb"
+          # 支持 argv 覆盖（便于本地测试）；CI 中走默认值
+          upstream = (sys.argv[1] if len(sys.argv) > 1
+                      else "anywhere-labs/deepseek-harness-desktop")
+          cask_path = (sys.argv[2] if len(sys.argv) > 2
+                       else "Casks/deepseek-harness-desktop.rb")
 
           rel = json.loads(subprocess.check_output([
               "curl", "-fsSL",
@@ -45,12 +48,25 @@ jobs:
                   shell=True).decode().strip()
 
           text = open(cask_path).read()
-          if f'version "{ver}"' in text and f'sha256 "{sha}"' in text:
+          asset_name = dmg["name"]
+          asset_pattern = asset_name.replace(ver, "#{version}")  # Ruby 插值形式
+          if (f'version "{ver}"' in text and f'sha256 "{sha}"' in text
+                  and (asset_name in text or asset_pattern in text)):
               print(f"up to date: {ver}")
               sys.exit(0)
 
+          # URL 也一并更新：上游可能改资产命名（v0.1.0 的
+          # DeepSeek-Harness-* 在 v2.0.0 变成了 DSH-Desktop-*）。
+          # 资产名含版本号时优先保持 #{version} 插值写法。
+          if ver in asset_name:
+              url = (f"https://github.com/{upstream}/releases/download/"
+                     f"v#{{version}}/{asset_pattern}")
+          else:
+              url = f"https://github.com/{upstream}/releases/download/v{ver}/{asset_name}"
+
           text = re.sub(r'version "[^"]+"', f'version "{ver}"', text, count=1)
           text = re.sub(r'sha256 "[^"]+"', f'sha256 "{sha}"', text, count=1)
+          text = re.sub(r'url "[^"]+"', f'url "{url}"', text, count=1)
           open(cask_path, "w").write(text)
           print(f"bumped to {ver} (sha256 {sha[:16]}...)")
           PY
@@ -62,7 +78,9 @@ jobs:
           brew style ./Casks/*.rb
           brew untap otoharirisa/deepseek-harness-desktop 2>/dev/null || true
           brew tap OTOHARiRiSA/deepseek-harness-desktop "$PWD"
-          brew audit --cask OTOHARiRiSA/deepseek-harness-desktop/deepseek-harness-desktop
+          # --online：真实下载新资产并校验 .app 名/plist/签名，
+          # 能拦下上游资产改名、最低系统版本变化这类问题
+          brew audit --cask --online OTOHARiRiSA/deepseek-harness-desktop/deepseek-harness-desktop
 
       - name: Commit & push
         run: |
