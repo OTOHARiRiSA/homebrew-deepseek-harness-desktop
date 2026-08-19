@@ -9,10 +9,8 @@
 
 ## 系统要求
 
-- **Apple Silicon（M1/M2/M3/M4 芯片）**：上游暂未发布 Intel 版本
+- **Apple Silicon 与 Intel**：v2.0.1 起提供 universal 安装包，两种架构均可安装
 - macOS Monterey（12）及以上
-
-> 在 Intel 机器上执行安装会被 Homebrew 直接拒绝并提示架构不兼容。
 
 ## 安装
 

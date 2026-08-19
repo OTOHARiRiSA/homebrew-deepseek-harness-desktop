@@ -1,8 +1,8 @@
 cask "deepseek-harness-desktop" do
-  version "2.0.0"
-  sha256 "d3f7f10acd90ea58ac0922428ab3d8a96ced8c73227b8c8f76f313181e8a0cfe"
+  version "2.0.1"
+  sha256 "84debb8bf2642d82f0eb77c9f087b030db3b8b8672a0b7c3423c681f61738ff9"
 
-  url "https://github.com/anywhere-labs/deepseek-harness-desktop/releases/download/v#{version}/DSH-Desktop-#{version}-arm64.dmg"
+  url "https://github.com/anywhere-labs/deepseek-harness-desktop/releases/download/v#{version}/DSH.Desktop-#{version}-universal.dmg"
   name "DSH Desktop", "DeepSeek Harness Desktop"
   desc "基于官方 DeepSeek Harness 打造的 Electron 图形化桌面客户端，开箱即用。"
   homepage "https://github.com/anywhere-labs/deepseek-harness-desktop"
@@ -13,7 +13,6 @@ cask "deepseek-harness-desktop" do
   end
 
   depends_on macos: :monterey
-  depends_on arch: :arm64
 
   app "DSH Desktop.app"
 
