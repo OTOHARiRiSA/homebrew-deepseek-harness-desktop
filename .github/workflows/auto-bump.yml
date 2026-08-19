@@ -74,13 +74,25 @@ jobs:
       - name: Verify cask
         env:
           HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HOMEBREW_NO_AUTO_UPDATE: "1"
         run: |
           brew style ./Casks/*.rb
           brew untap otoharirisa/deepseek-harness-desktop 2>/dev/null || true
           brew tap OTOHARiRiSA/deepseek-harness-desktop "$PWD"
           # --online：真实下载新资产并校验 .app 名/plist/签名，
-          # 能拦下上游资产改名、最低系统版本变化这类问题
-          brew audit --cask --online OTOHARiRiSA/deepseek-harness-desktop/deepseek-harness-desktop
+          # 能拦下上游资产改名、最低系统版本变化这类问题。
+          # 下载/挂载 dmg、GitHub API 偶发抖动，故重试 3 次。
+          for attempt in 1 2 3; do
+            echo "== audit attempt $attempt =="
+            if brew audit --cask --online OTOHARiRiSA/deepseek-harness-desktop/deepseek-harness-desktop; then
+              echo "audit passed"
+              exit 0
+            fi
+            echo "audit attempt $attempt failed, retrying in 20s..."
+            sleep 20
+          done
+          echo "audit failed after 3 attempts"
+          exit 1
 
       - name: Commit & push
         run: |
