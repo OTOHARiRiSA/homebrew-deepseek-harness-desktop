@@ -39,7 +39,8 @@ jobs:
             # 不输出 tap-name，此时再 `brew tap ... "$PWD"` 会报
             # remote mismatch；已注册就直接复用。
             TAP="OTOHARiRiSA/deepseek-harness-desktop"
-            brew tap --list | grep -qi "otoharirisa/deepseek-harness-desktop" \
+            # `brew tap`（无参数）才是列出已安装 tap 的写法；`--list` 已不支持
+            brew tap | grep -qi "otoharirisa/deepseek-harness-desktop" \
               || brew tap "$TAP" "$PWD"
           fi
           brew audit --cask --online "$TAP/deepseek-harness-desktop"
