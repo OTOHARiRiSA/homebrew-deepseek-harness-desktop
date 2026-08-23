@@ -71,6 +71,27 @@ jobs:
           print(f"bumped to {ver} (sha256 {sha[:16]}...)")
           PY
 
+      - name: Commit bump locally
+        # 必须先把 bump 提交到本地 git，再让 Verify 步骤去 audit：
+        # `brew tap <user>/<repo> "$PWD"` 底层是 git clone，只复制
+        # 已提交内容。若不先提交，audit 拿到的是旧版 cask，会因
+        # livecheck 版本不一致而失败（2026-08-22/23 auto-bump 连续
+        # 失败的根因：audit 报了 "Version '2.0.1' differs from
+        # '2.0.2' retrieved by livecheck"）。
+        # 该提交只存在于 runner 本地，Verify 通过后由 Push 步骤推送；
+        # Verify 失败则随 runner 一起丢弃，不会污染仓库。
+        run: |
+          if git diff --quiet; then
+            echo "no changes, skip commit"
+            exit 0
+          fi
+          VER=$(grep -o 'version "[^"]*"' Casks/deepseek-harness-desktop.rb | head -1 | cut -d'"' -f2)
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Casks/deepseek-harness-desktop.rb
+          git commit -m "deepseek-harness-desktop: bump to ${VER}"
+          echo "committed bump to ${VER}"
+
       - name: Verify cask
         env:
           HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -94,15 +115,12 @@ jobs:
           echo "audit failed after 3 attempts"
           exit 1
 
-      - name: Commit & push
+      - name: Push bump
+        # bump 已在「Commit bump locally」提交，这里只负责推送。
         run: |
-          if git diff --quiet; then
-            echo "no changes"
-            exit 0
+          if git log origin/main..HEAD 2>/dev/null | grep -q .; then
+            git push
+            echo "pushed"
+          else
+            echo "no changes to push"
           fi
-          VER=$(grep -o 'version "[^"]*"' Casks/deepseek-harness-desktop.rb | head -1 | cut -d'"' -f2)
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add Casks/deepseek-harness-desktop.rb
-          git commit -m "deepseek-harness-desktop: bump to ${VER}"
-          git push
