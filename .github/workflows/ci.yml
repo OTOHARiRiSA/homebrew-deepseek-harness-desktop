@@ -34,8 +34,12 @@ jobs:
         run: |
           TAP="${{ steps.setup-homebrew.outputs.tap-name }}"
           if [ -z "$TAP" ]; then
-            # 兜底：action 未自动注册时才手动 tap
+            # 兜底：action 未自动注册时才手动 tap。
+            # 注意：某些版本（如 2026.07.10.1）会自动注册 tap 但
+            # 不输出 tap-name，此时再 `brew tap ... "$PWD"` 会报
+            # remote mismatch；已注册就直接复用。
             TAP="OTOHARiRiSA/deepseek-harness-desktop"
-            brew tap "$TAP" "$PWD"
+            brew tap --list | grep -qi "otoharirisa/deepseek-harness-desktop" \
+              || brew tap "$TAP" "$PWD"
           fi
           brew audit --cask --online "$TAP/deepseek-harness-desktop"
