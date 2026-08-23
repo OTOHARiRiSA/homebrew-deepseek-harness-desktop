@@ -15,7 +15,9 @@ jobs:
 
       - name: Set up Homebrew
         id: setup-homebrew
-        uses: Homebrew/actions/setup-homebrew@master
+        # 固定 SHA（2026.07.10.1）；master 分支同步已停止，未固定会在
+        # Homebrew 5.2.0 起直接报错
+        uses: Homebrew/actions/setup-homebrew@1f8e202ffddf94def7f42f6fa3a482e821489f9c
 
       - name: Style check (brew style)
         run: brew style ./Casks/*.rb
