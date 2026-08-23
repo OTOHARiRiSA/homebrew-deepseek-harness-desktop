@@ -35,7 +35,7 @@ brew install --cask deepseek-harness-desktop
 brew install --cask --no-quarantine deepseek-harness-desktop
 
 # 方式二：安装完成后手动移除隔离属性
-xattr -dr com.apple.quarantine "/Applications/DeepSeek Harness.app"
+xattr -dr com.apple.quarantine "/Applications/DSH Desktop.app"
 ```
 
 ## 使用
